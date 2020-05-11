@@ -112,25 +112,6 @@ vector<double> GenereateNumbers(string selection, size_t n) {
 	return numbers;
 }
 
-// template <typename T> bool IsSortedAndNothingIsLost (vector <T> &Before, vector <T> &After) {
-// bool CorrectlySorted = true;
-// for(size_t i= 0; i < After.size() - 2; i++) {
-// if(After.at(i) <= After.at(i + 1)) {
-// for(size_t j = 0; j < Before.size() - 1; j++) {
-// if(After.at(i) == Before.at(j)) {
-// CorrectlySorted = true;
-// break;
-// }
-// CorrectlySorted = false;
-// }
-// } else {
-// CorrectlySorted = false;
-// break;
-// }
-// }
-// return CorrectlySorted;
-// }
-
 template < class T> bool IsSortedAndNothingIsLost(vector <T> &Before, vector <T> &After){
 	unsigned int beforeLength = Before.size();
 	int counter = 0;
