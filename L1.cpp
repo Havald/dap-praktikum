@@ -32,39 +32,58 @@ template<typename T> void InsertionSort(vector<T> &a) {
 	}
 }
 
-template < class T > void MergeSort(vector <T> &a){
-    vector<double> tempVector;
-    int lengthInput = a.size();
-    int lengthHelp;
-    int leftSite;
-    int rightSite;
-    int mid;
-    int positionRight = 1;
-    int positionLeft = 1;
-    
-    for(lengthHelp = 1; lengthHelp < lengthInput; lengthHelp *= 2){
-        for(leftSite = 0; leftSite < lengthHelp - 1; leftSite += 2*lengthHelp){
-            if(leftSite + 2*lengthHelp < lengthInput){rightSite =  leftSite + 2*lengthHelp - 1;}
-            else{rightSite = lengthInput - 1;}
-            
-            if(leftSite + 2*lengthHelp > lengthInput){
-                if(leftSite + lengthHelp -1 > rightSite){mid = leftSite;}
-                else{mid = leftSite + lengthHelp -1;}
-            }
-        }
-        for(int i = 0; i < ((rightSite-leftSite)-1); i++){
-            if(positionLeft <= mid && (positionRight > rightSite || a.at(i) <= a.at(positionRight))){
-                tempVector.at(i) = a.at(positionLeft);
-                positionLeft++;
-            }
-            else{
-                tempVector.at(i) = a.at(positionRight);
-                positionRight++;
-            }
-        }
-        for(int i = 0; i < rightSite-leftSite + 1; i++){a.at(leftSite + i) = tempVector.at(i);}
-    }
-    
+template<typename T> void merge(vector<T> &a, int left, int middle, int right) // Helper für MergeSort
+{ 
+	int i, j, k; 
+	int SizeLeft = middle - left + 1; 
+	int SizeRight =  right - middle; 
+
+	vector<T> L(SizeLeft), R(SizeRight); 
+
+	for (i = 0; i < SizeLeft; i++) 
+	L[i] = a.at(left + i); 
+	for (j = 0; j < SizeRight; j++) 
+	R[j] = a.at(middle + 1+ j); 
+
+	i = 0; 
+	j = 0; 
+	k = left; 
+	while (i < SizeLeft && j < SizeRight) { 
+		if (L[i] <= R[j]) { 
+			a.at(k) = L[i]; 
+			i++; 
+		} 
+		else { 
+			a.at(k) = R[j]; 
+			j++; 
+		} 
+		k++; 
+	} 
+	while (i < SizeLeft) { 
+		a.at(k) = L[i]; 
+		i++; 
+		k++; 
+	} 
+	while (j < SizeRight) { 
+		a.at(k) = R[j]; 
+		j++; 
+		k++; 
+	} 
+} 
+
+template<typename T> void MergeSort(vector<T> &a) { // Copied from G4G
+	int curr_size;
+	int left_start; 
+	int n = a.size();
+	for (curr_size=1; curr_size < n; curr_size = 2*curr_size) 
+	{
+		for (left_start=0; left_start< n - 1; left_start += 2*curr_size) 
+		{
+			int mid = min(left_start + curr_size - 1, n-1); 
+			int right_end = min(left_start + 2*curr_size - 1, n-1); 
+			merge(a, left_start, mid, right_end); 
+		} 
+	} 
 }
 
 
