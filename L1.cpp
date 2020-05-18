@@ -31,45 +31,43 @@ template<typename T> void InsertionSort(vector<T> &a) {
 	}
 }
 
-template<typename T> void merge(vector<T> &a, unsigned int left, unsigned int middle, unsigned int right) // Helper für MergeSort
+template<typename T> void merge(vector<T> &a, vector<T> &Hilf, unsigned int left, unsigned int middle, unsigned int right) // Helper für MergeSort
 {   
-	vector<T> Hilf(a.size()); 
 	unsigned int i;
 	unsigned int i_1 = left;
 	unsigned int i_2 = middle + 1;
 	for(size_t j = 0; j < right - left + 1; j++) {
 		if((i_2 > right) || ((i_1 < middle + 1) && (a.at(i_1) <= a.at(i_2)))) {
-			i = i_1;
-			i_1++;
+			i = i_1++;
 		} else {
-			i = i_2;
-			i_2++;
+			i = i_2++;
 		}
 		Hilf.at(left + j) = a.at(i);
 	}
-	for(i = left; i <= right; i++) a.at(i) = Hilf.at(i);
-
-	// int SizeLeft = middle - left + 1; 
-	// int SizeRight =  right - middle; 
-
-
-	
-	
 } 
 
 template<typename T> void MergeSort(vector<T> &a) { 
+	vector<T> Hilfsvektor(a.size());
 	unsigned int lengthHelp;
 	unsigned int left; 
 	unsigned int length = a.size();
+	bool aIsHelpArray = true; // Hilfsbool, um zu wissen, von welchem Vektor in welchen übertragen wird
 	for (lengthHelp=1; lengthHelp < length; lengthHelp *= 2) 
 	{
+		aIsHelpArray = !aIsHelpArray;
 		for (left=0; left < length - 1; left += 2 * lengthHelp) 
 		{
 			unsigned int mid = min(left + lengthHelp - 1, length - 1); 
 			unsigned int right = min(left + 2*lengthHelp - 1, length - 1); 
-			merge(a, left, mid, right); 
+			aIsHelpArray ? 	merge(Hilfsvektor, a, left, mid, right):
+							merge(a, Hilfsvektor, left, mid, right); 
+			
+
 		} 
 	} 
+	if(!aIsHelpArray) {
+		for(left = 0; left < a.size(); left++) a.at(left) = Hilfsvektor.at(left);
+	}
 }
 
 
@@ -199,9 +197,11 @@ int main(int argc, char *argv[]) {
 		}
 		
 	} catch (const char *Reason) {
+		delete[] _emergencyMemory; 
 		cerr << Reason << endl; // Handle Exception
 		exit(1);
 	} catch(const out_of_range& Oor) {
+		delete[] _emergencyMemory; 
 		cerr << "Went out of Range! Operation resulted in:" << endl << Oor.what();
 		exit(1);
 	} catch(const bad_alloc& Oom) {
@@ -209,6 +209,7 @@ int main(int argc, char *argv[]) {
 		cerr << "Ran out of Memory! Operation resulted in:" << endl << Oom.what();
 		exit(1);
 	} catch(const exception& ex) {
+		delete[] _emergencyMemory; 
 		cerr << "Unexpected Exception! The following Message was thrown: " << endl << ex.what();
 		exit(1);
 	}
