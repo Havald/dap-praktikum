@@ -1,4 +1,3 @@
-#define name mysort
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
@@ -32,78 +31,64 @@ template<typename T> void InsertionSort(vector<T> &a) {
 	}
 }
 
-template<typename T> void merge(vector<T> &a, int left, int middle, int right) // Helper für MergeSort
-{ 
-	int i, j, k; 
-	int SizeRight = middle - left + 1; 
-	int SizeLeft =  right - middle; 
-
-	vector<T> L(SizeRight), R(SizeLeft); 
-
-	for (i = 0; i < SizeRight; i++) 
-	L[i] = a.at(left + i); 
-	for (j = 0; j < SizeLeft; j++) 
-	R[j] = a.at(middle + 1+ j); 
-
-	i = 0; 
-	j = 0; 
-	k = left; 
-	while (i < SizeRight && j < SizeLeft) { 
-		if (L[i] <= R[j]) { 
-			a.at(k) = L[i]; 
-			i++; 
-		} 
-		else { 
-			a.at(k) = R[j]; 
-			j++; 
-		} 
-		k++; 
-	} 
-	while (i < SizeRight) { 
-		a.at(k) = L[i]; 
-		i++; 
-		k++; 
-	} 
-	while (j < SizeLeft) { 
-		a.at(k) = R[j]; 
-		j++; 
-		k++; 
-	} 
+template<typename T> void merge(vector<T> &a, vector<T> &Hilf, unsigned int left, unsigned int middle, unsigned int right) // Helper für MergeSort
+{   
+	unsigned int i;
+	unsigned int i_1 = left;
+	unsigned int i_2 = middle + 1;
+	for(size_t j = 0; j < right - left + 1; j++) {
+		if((i_2 > right) || ((i_1 < middle + 1) && (a.at(i_1) <= a.at(i_2)))) {
+			i = i_1++;
+		} else {
+			i = i_2++;
+		}
+		Hilf.at(left + j) = a.at(i);
+	}
 } 
 
-template<typename T> void MergeSort(vector<T> &a) { // Copied from G4G
-	int curr_size;
-	int left_start; 
-	int n = a.size();
-	for (curr_size=1; curr_size < n; curr_size = 2*curr_size) 
+template<typename T> void MergeSort(vector<T> &a) { 
+	vector<T> Hilfsvektor(a.size());
+	unsigned int lengthHelp;
+	unsigned int left; 
+	unsigned int length = a.size();
+	bool aIsHelpArray = true; // Hilfsbool, um zu wissen, von welchem Vektor in welchen übertragen wird
+	for (lengthHelp=1; lengthHelp < length; lengthHelp *= 2) 
 	{
-		for (left_start=0; left_start< n - 1; left_start += 2*curr_size) 
+		aIsHelpArray = !aIsHelpArray;
+		for (left=0; left < length - 1; left += 2 * lengthHelp) 
 		{
-			int mid = min(left_start + curr_size - 1, n-1); 
-			int right_end = min(left_start + 2*curr_size - 1, n-1); 
-			merge(a, left_start, mid, right_end); 
+			unsigned int mid = min(left + lengthHelp - 1, length - 1); 
+			unsigned int right = min(left + 2*lengthHelp - 1, length - 1); 
+			aIsHelpArray ? 	merge(Hilfsvektor, a, left, mid, right):
+							merge(a, Hilfsvektor, left, mid, right); 
+			
+
 		} 
 	} 
+	if(!aIsHelpArray) {
+		for(left = 0; left < a.size(); left++) a.at(left) = Hilfsvektor.at(left);
+	}
 }
 
 
 vector<double> GenereateNumbers(string selection, size_t n) {
 	vector<double> numbers(n, 17);
 	if(selection != "constant") {
-		numbers[0] = 0;
 		if(selection == "random") {
 			cout << setiosflags(ios::fixed) << setprecision(12);
 			srand(time(nullptr));
 			for(size_t i = 0; i < n; i++) {
-				numbers[i] = ((double) rand() / (RAND_MAX));	
+				numbers.at(i) = ((double) rand() / (RAND_MAX));	
 			}
 		} else if(selection == "up") {
+			numbers.at(0) = 0;
 			for(size_t i = 1; i < n; i++) {
-				numbers[i] = numbers[i-1] + 1;
+				numbers.at(i) = numbers.at(i-1) + 1;
 			}
 		} else if(selection == "down") {
+			numbers.at(0) = 0;
 			for(size_t i = 1; i < n; i++) {
-				numbers[i] = numbers[i-1] - 1;
+				numbers.at(i) = numbers.at(i-1) - 1;
 			}
 		} else {
 			throw "Second Parameter must be chosen from random|up|down|constant";
@@ -112,7 +97,7 @@ vector<double> GenereateNumbers(string selection, size_t n) {
 	return numbers;
 }
 
-template < class T> bool IsSortedAndNothingIsLost(vector <T> &Before, vector <T> &After){
+template <class T> bool IsSortedAndNothingIsLost(vector <T> &Before, vector <T> &After){
 	unsigned int beforeLength = Before.size();
 	int counter = 0;
 	
@@ -121,8 +106,6 @@ template < class T> bool IsSortedAndNothingIsLost(vector <T> &Before, vector <T>
 	for(unsigned int i = 0; i <= beforeLength-1;i++){
 		counter++;
 		for(unsigned int j = 0; j <= beforeLength-1; j++){
-			// if(After.at(i) == After.at(j)){counter++;
-			// }
 			
 			if(After.at(i) == Before.at(j)){
 				counter--;
@@ -139,6 +122,8 @@ template < class T> bool IsSortedAndNothingIsLost(vector <T> &Before, vector <T>
 }
 
 int main(int argc, char *argv[]) {
+	char* _emergencyMemory = new char[8196];
+		// 8K Speicher reservieren, um im Notfall eine Fehlernachricht ausgeben zu können
 	int count;	// Optionen und Daten
 	char* Input = nullptr;
 	bool CalculateTime = false; 
@@ -177,7 +162,6 @@ int main(int argc, char *argv[]) {
 		}
 		vector<double> NumbersToSort = GenereateNumbers(Input, count); 
 		vector<double> OriginalNumbers = NumbersToSort;
-		
 		double MeasuredTime = double(clock());
 		if (SortType == 0) {
 			cout << "Using BubbleSort" << endl;
@@ -213,14 +197,22 @@ int main(int argc, char *argv[]) {
 		}
 		
 	} catch (const char *Reason) {
+		delete[] _emergencyMemory; 
 		cerr << Reason << endl; // Handle Exception
 		exit(1);
 	} catch(const out_of_range& Oor) {
-		cerr << Oor.what() 	<< endl;
+		delete[] _emergencyMemory; 
+		cerr << "Went out of Range! Operation resulted in:" << endl << Oor.what();
 		exit(1);
-	} catch(...) {
-		cerr << "unbehandelte Ausnahme!" << endl;
+	} catch(const bad_alloc& Oom) {
+		delete[] _emergencyMemory; 
+		cerr << "Ran out of Memory! Operation resulted in:" << endl << Oom.what();
+		exit(1);
+	} catch(const exception& ex) {
+		delete[] _emergencyMemory; 
+		cerr << "Unexpected Exception! The following Message was thrown: " << endl << ex.what();
 		exit(1);
 	}
+	delete[] _emergencyMemory;
 	return 0;
 }
